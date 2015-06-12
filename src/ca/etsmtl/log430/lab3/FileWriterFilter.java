@@ -169,7 +169,19 @@ public class FileWriterFilter extends Thread {
 
 		// Write the string array to output file
 		try {
-			for (i = 0; i < count; i++) {
+            String tempString="";
+            for (int j=count-1 ; j > 0 ; --j){
+                for (int k=0 ;  k < j; ++k){
+                    int value = tmpArray[k].split(" ")[2].compareTo(tmpArray[k+1].split(" ")[2]);
+                    if(value > 0){
+                        tempString = tmpArray[k];
+                        tmpArray[k] = tmpArray[k+1];
+                        tmpArray[k+1] = tempString;
+                    }
+                }
+            }
+
+            for (i = 0; i < count; i++) {
 				System.out.println("FileWriterFilter:: Writing: " + tmpArray[i]);
 				bout.write(tmpArray[i]);
 

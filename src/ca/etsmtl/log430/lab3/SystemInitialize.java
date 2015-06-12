@@ -45,7 +45,7 @@ public class SystemInitialize {
 		// Let's make sure that input and output files are provided on the
 		// command line
 
-		if (argv.length != 2) {
+		if (argv.length != 3) {
 
 			System.out
 					.println("\n\nNombre incorrect de parametres d'entree. Utilisation:");
@@ -54,20 +54,25 @@ public class SystemInitialize {
 
 		} else {
 			// These are the declarations for the pipes.
-			PipedWriter pipe01 = new PipedWriter();
-			PipedWriter pipe02 = new PipedWriter();
-			PipedWriter pipe03 = new PipedWriter();
-			PipedWriter pipe04 = new PipedWriter();
-			PipedWriter pipe05 = new PipedWriter();
-			PipedWriter pipe06 = new PipedWriter();
+			PipedWriter fileReaderToStatusFilterPipe = new PipedWriter();
+			PipedWriter statusFilterToStateFilterREG = new PipedWriter();
+			PipedWriter statusFilterToStateFilterCRI = new PipedWriter();
+			PipedWriter stateREGSelectedToMerge = new PipedWriter();
+            PipedWriter stateREGNotSelectedToMerge = new PipedWriter();
+			PipedWriter stateCRISelectedToMerge = new PipedWriter();
+            PipedWriter stateCRINotSelectedToMerge = new PipedWriter();
+			PipedWriter mergeSelectedToFileWriter = new PipedWriter();
+            PipedWriter mergeNotSelectedToFileWriter = new PipedWriter();
 
 			// Instantiate Filter Threads
-			Thread fileReaderFilter = new FileReaderFilter(argv[0], pipe01);
-			Thread statusFilter = new StatusFilter(pipe01, pipe02, pipe03);
-			Thread stateFilter1 = new StateFilter("RIS", pipe02, pipe04);
-			Thread stateFilter2 = new StateFilter("DIF", pipe03, pipe05);
-			Thread mergeFilter = new MergeFilter(pipe04, pipe05, pipe06);
-			Thread fileWriterFilter = new FileWriterFilter(argv[1], pipe06);
+			Thread fileReaderFilter = new FileReaderFilter(argv[0], fileReaderToStatusFilterPipe);
+			Thread statusFilter = new StatusFilter(fileReaderToStatusFilterPipe, statusFilterToStateFilterREG, statusFilterToStateFilterCRI);
+			Thread stateFilter1 = new StateFilter("RIS", statusFilterToStateFilterREG, stateREGSelectedToMerge, stateREGNotSelectedToMerge);
+			Thread stateFilter2 = new StateFilter("DIF", statusFilterToStateFilterCRI, stateCRISelectedToMerge, stateCRINotSelectedToMerge);
+			Thread mergeFilter = new MergeFilter(stateREGSelectedToMerge, stateCRISelectedToMerge,stateREGNotSelectedToMerge,
+                    stateCRINotSelectedToMerge, mergeSelectedToFileWriter, mergeNotSelectedToFileWriter);
+			Thread fileWriterSelectedFilter = new FileWriterFilter(argv[1], mergeSelectedToFileWriter);
+            Thread fileWriterNotSelectedFilter = new FileWriterFilter(argv[2], mergeNotSelectedToFileWriter);
 
 			// Start the threads
 			fileReaderFilter.start();
@@ -75,7 +80,8 @@ public class SystemInitialize {
 			stateFilter1.start();
 			stateFilter2.start();
 			mergeFilter.start();
-			fileWriterFilter.start();
+            fileWriterSelectedFilter.start();
+            fileWriterNotSelectedFilter.start();
 			
 		}  // if
 		

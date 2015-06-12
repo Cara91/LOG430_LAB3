@@ -41,10 +41,11 @@ public class StateFilter extends Thread {
 
 	String severity;
 	PipedReader inputPipe = new PipedReader();
-	PipedWriter outputPipe = new PipedWriter();
+	PipedWriter selectedOutputPipe = new PipedWriter();
+    PipedWriter notSelectedOutputPipe = new PipedWriter();
 
 	public StateFilter(String severity, PipedWriter inputPipe,
-			PipedWriter outputPipe) {
+			PipedWriter selectedOutputPipe, PipedWriter notSelectedOutputPipe) {
 
 		this.severity = severity;
 
@@ -56,9 +57,13 @@ public class StateFilter extends Thread {
 					+ ":: connected to upstream filter.");
 
 			// Connect outputPipe
-			this.outputPipe = outputPipe;
+			this.selectedOutputPipe = selectedOutputPipe;
 			System.out.println("StateFilter " + severity
 					+ ":: connected to downstream filter.");
+
+            this.notSelectedOutputPipe = notSelectedOutputPipe;
+            System.out.println("StateFilter " + severity
+                    + ":: connected to downstream filter.");
 
 		} catch (Exception Error) {
 
@@ -104,13 +109,21 @@ public class StateFilter extends Thread {
 
 							System.out.println("StateFilter "
 									+ severity + ":: sending: "
-									+ lineOfText + " to output pipe.");
+									+ lineOfText + " to selected output pipe.");
 							lineOfText += new String(characterValue);
-							outputPipe
+							selectedOutputPipe
 									.write(lineOfText, 0, lineOfText.length());
-							outputPipe.flush();
+							selectedOutputPipe.flush();
 
-						} // if
+						} else{
+                            System.out.println("StateFilter "
+                                    + severity + ":: sending: "
+                                    + lineOfText + " to not selected output pipe.");
+                            lineOfText += new String(characterValue);
+                            notSelectedOutputPipe
+                                    .write(lineOfText, 0, lineOfText.length());
+                            notSelectedOutputPipe.flush();
+                        }// if
 
 						lineOfText = "";
 
@@ -137,9 +150,13 @@ public class StateFilter extends Thread {
 			System.out.println("StateFilter " + severity
 					+ ":: input pipe closed.");
 
-			outputPipe.close();
+			selectedOutputPipe.close();
 			System.out.println("StateFilter " + severity
 					+ ":: output pipe closed.");
+
+            notSelectedOutputPipe.close();
+            System.out.println("StateFilter " + severity
+                    + ":: output pipe closed.");
 
 		} catch (Exception error) {
 

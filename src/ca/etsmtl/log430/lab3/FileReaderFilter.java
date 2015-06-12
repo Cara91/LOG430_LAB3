@@ -94,13 +94,18 @@ public class FileReaderFilter extends Thread {
 					System.out.println("FileReaderFilter:: read: "
 							+ LineOfText);
 					try {
+
+						//Statut, État, Taux, Numéro projet.
+						String[] lineTable = LineOfText.split(" ");
+						String lineFilter = " " + lineTable[1] + " " + lineTable[5] + " " + lineTable[4] + " " + lineTable[0];
+
 						// write line of text to the pipe
-						outputPipe1.write(LineOfText, 0, LineOfText.length());
+						outputPipe1.write(lineFilter, 0, lineFilter.length());
 						outputPipe1.write((int) '\n');
 						// signals end of line
 						outputPipe1.flush();
 						System.out.println("FileReaderFilter:: wrote: "
-								+ LineOfText + " to outputPipe.");
+								+ lineFilter + " to outputPipe.");
 					} catch (Exception Error) {
 						System.out
 						.println("FileReaderFilter:: Error writing to outputPipe.");
