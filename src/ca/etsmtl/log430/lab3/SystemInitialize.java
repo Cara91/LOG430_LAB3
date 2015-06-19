@@ -69,8 +69,9 @@ public class SystemInitialize {
 			Thread statusFilter = new StatusFilter(fileReaderToStatusFilterPipe, statusFilterToStateFilterREG, statusFilterToStateFilterCRI);
 			Thread stateFilter1 = new StateFilter("RIS", statusFilterToStateFilterREG, stateREGSelectedToMerge, stateREGNotSelectedToMerge);
 			Thread stateFilter2 = new StateFilter("DIF", statusFilterToStateFilterCRI, stateCRISelectedToMerge, stateCRINotSelectedToMerge);
-			Thread mergeFilter = new MergeFilter(stateREGSelectedToMerge, stateCRISelectedToMerge,stateREGNotSelectedToMerge,
-                    stateCRINotSelectedToMerge, mergeSelectedToFileWriter, mergeNotSelectedToFileWriter);
+			Thread mergeSelectedFilter = new MergeFilter(stateREGSelectedToMerge, stateCRISelectedToMerge, mergeSelectedToFileWriter);
+            Thread mergeNotSelectedFilter = new MergeFilter(stateREGNotSelectedToMerge,
+                    stateCRINotSelectedToMerge, mergeNotSelectedToFileWriter);
 			Thread fileWriterSelectedFilter = new FileWriterFilter(argv[1], mergeSelectedToFileWriter);
             Thread fileWriterNotSelectedFilter = new FileWriterFilter(argv[2], mergeNotSelectedToFileWriter);
 
@@ -79,7 +80,8 @@ public class SystemInitialize {
 			statusFilter.start();
 			stateFilter1.start();
 			stateFilter2.start();
-			mergeFilter.start();
+			mergeSelectedFilter.start();
+            mergeNotSelectedFilter.start();
             fileWriterSelectedFilter.start();
             fileWriterNotSelectedFilter.start();
 			
